@@ -21,29 +21,19 @@ import net.bobmandude9889.GUI.GUIHandler;
 import net.izenith.Chat.ChatHandler;
 import net.izenith.CommandSpy.CommandFilter;
 import net.izenith.CommandSpy.CommandListener;
-import net.izenith.Commands.AddPlot;
 import net.izenith.Commands.AdminChat;
 import net.izenith.Commands.ClearChat;
 import net.izenith.Commands.CommandSpy;
 import net.izenith.Commands.Donated;
-import net.izenith.Commands.GKit;
-import net.izenith.Commands.GetConsoleKey;
 import net.izenith.Commands.HubCommand;
-import net.izenith.Commands.Kit;
-import net.izenith.Commands.Lel;
 import net.izenith.Commands.Ping;
 import net.izenith.Commands.PlayTime;
 import net.izenith.Commands.Ranks;
 import net.izenith.Commands.Rename;
 import net.izenith.Commands.Report;
 import net.izenith.Commands.ServerIp;
-import net.izenith.Commands.Suspend;
 import net.izenith.Commands.Translate;
-import net.izenith.Commands.Trusted;
 import net.izenith.Commands.UpdateList;
-import net.izenith.Commands.WorldEditPerms;
-import net.izenith.Events.BlockPlaceListener;
-import net.izenith.Events.BowListener;
 import net.izenith.Events.DamageListener;
 import net.izenith.Events.InteractListener;
 import net.izenith.Events.InventoryClickListener;
@@ -112,24 +102,16 @@ public class Vars {
 		}, 100, 100);
 		
 		commands = new HubCommand[] { 
-				new CommandSpy(), 
-				new Lel(),
+				new CommandSpy(),
 				new Report(),
-				new Kit(),
-				new GKit(),
-				new Trusted(),
 				new Ranks(),
-				new Suspend(),
 				new ServerIp(),
 				new Donated(),
-				new WorldEditPerms(),
-				new AddPlot(),
 				new PlayTime(),
 				new UpdateList(),
 				new AdminChat(),
 				new ClearChat(),
 				new Translate(),
-				new GetConsoleKey(),
 				new Rename(),
 				new Ping()
 				//new Console()
@@ -151,8 +133,6 @@ public class Vars {
 		lis.add(new InteractListener());
 		lis.add(new PlayerMoveListener());
 		lis.add(new DamageListener());
-		lis.add(new BowListener());
-		lis.add(new BlockPlaceListener());
 		lis.add(new InventoryClickListener());
 		lis.add(new ItemDropListener());
 		new ServerListHandler();

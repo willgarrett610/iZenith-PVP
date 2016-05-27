@@ -33,7 +33,7 @@ public class PlayerLogListener extends Util implements Listener {
 					Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
 							"title " + name + " subtitle {text:\"" + name + "\",color:\"gray\"}");
 					Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-							"title " + name + " title {text:\"Welcome to \",color:\"dark_gray\",extra:[{text:\"iZenith\",color:\"white\"},{text:\" Minecraft\",color:\"gold\"}]}");
+							"title " + name + " title {text:\"Welcome to \",color:\"dark_gray\",extra:[{text:\"iZenith\",color:\"red\"},{text:\" PVP\",color:\"white\"}]}");
 					iPlayer.createFile();
 				}
 			},20);

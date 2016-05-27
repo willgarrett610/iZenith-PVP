@@ -111,8 +111,9 @@ public class PlayTime implements HubCommand {
 			}
 		} else {
 			iPlayer = new IPlayer((Player) sender);
-			System.out.println(iPlayer);
+			sender.sendMessage(iPlayer.getOnlineTimeHours());
 			time = iPlayer.getOnlineTime();
+			shortTime = iPlayer.getOnlineTimeHours();
 			name = sender.getName();
 		}
 		if (time == null) {

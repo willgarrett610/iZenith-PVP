@@ -37,3 +37,5 @@ player_list_message: "&7&l&m--------------[&r &6&liZenith &f&lMinecraft &7&l&m]-
 tab_info:
   header: "&7&l&m--------&f&lWelcome to &6&liZenith&7&l&m--------"
   footer: "&7&l&m--------[&9&lDonate: &5&lstore.izenith.net&7&l&m]--------\n&7&l&m   --------[&9&lTeamSpeak: &5&ltalk.izenith.net&7&l&m]--------"
+  
+spawn_world: "spawn"

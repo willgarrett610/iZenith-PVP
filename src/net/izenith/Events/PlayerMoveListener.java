@@ -4,16 +4,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
+import net.izenith.Main.Util;
+
 public class PlayerMoveListener implements Listener{
 
 	@EventHandler
 	public void onMove(PlayerMoveEvent e){
-		if(e.getTo().getWorld().getName().equals("spawn") && e.getTo().getBlockY() < 50){
-			if(Math.abs(-1000 - e.getTo().getBlockX()) < 500){
-				e.getPlayer().performCommand("warp info");
-			} else if(Math.abs(0 - e.getTo().getBlockX()) < 500){
-				e.getPlayer().performCommand("spawn");
-			}
+		if(e.getTo().getWorld().getName().equals(Util.getConfig().getString("spawn_world")) && e.getTo().getBlockY() < 50){
+			e.getPlayer().performCommand(Util.getConfig().getString("spawn_world"));
 		}
 	}
 	

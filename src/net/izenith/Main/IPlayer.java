@@ -93,20 +93,6 @@ public class IPlayer {
 		}
 	}
 
-	public void setKit(String name) {
-		name = name.toLowerCase();
-		String[] arrayKit = Util.playerInventoryToBase64(player.getInventory());
-		List<String> kit = new ArrayList<String>();
-		kit.add(arrayKit[0]);
-		kit.add(arrayKit[1]);
-		config.set("kits." + name, kit);
-		try {
-			config.save(file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	public void getKit(String name, boolean message) {
 		name = name.toLowerCase();
 		List<String> kit = config.getStringList("kits." + name);

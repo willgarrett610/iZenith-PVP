@@ -246,23 +246,6 @@ public class Util {
 		return message.toLowerCase().startsWith(regex.toLowerCase());
 	}
 
-	public static void suspend(Player player) {
-		getConfig().set("suspended." + player.getUniqueId().toString(), getPermissions().getPlayerGroups(player)[0]);
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex user " + player.getName() + " group set suspended");
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex user " + player.getName() + " add -*");
-		player.sendMessage(ChatColor.RED + "You are now suspended and no longer have any permissions");
-		Util.getMain().saveConfig();
-	}
-
-	public static void removeSuspend(Player player) {
-		Util.getMain().reloadConfig();
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex user " + player.getName() + " group set " + getConfig().getString("suspended." + player.getUniqueId().toString()));
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex user " + player.getName() + " remove -*");
-		getConfig().set("suspended." + player.getUniqueId().toString(), null);
-		player.sendMessage(ChatColor.GREEN + "You are no longer suspended!");
-		Util.getMain().saveConfig();
-	}
-
 	public static void setAllOnlineTimes() {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			IPlayerHandler.getPlayer(player).setOnlineTime();
@@ -340,41 +323,6 @@ public class Util {
 			ret = ret.substring(0, ((ret.length() - 2) - seperator.length()) + 1);
 		}
 		return ret;
-	}
-
-	public static boolean isVerified(String key) {
-		return getConfig().getStringList("console_keys").contains(key);
-	}
-
-	public static void addKey(String key) {
-		List<String> keys = getConfig().getStringList("console_keys");
-		if (keys == null)
-			keys = new ArrayList<String>();
-		keys.add(key);
-		getConfig().set("console_keys", keys);
-		getMain().saveConfig();
-	}
-
-	public static void removeKey(String key) {
-		List<String> keys = getConfig().getStringList("console_keys");
-		if (keys == null)
-			return;
-		keys.remove(key);
-		getConfig().set("console_keys", keys);
-		getMain().saveConfig();
-	}
-
-	public static String addRandomKey() {
-		Random gen = new Random();
-		int max = (int) ('z');
-		int min = (int) ('a');
-		String key = "";
-		for (int i = 0; i < 15; i++) {
-			int code = gen.nextInt(max - min);
-			key += (char) (code + min);
-		}
-		addKey(key);
-		return key;
 	}
 
 	public static boolean isURL(String s) {

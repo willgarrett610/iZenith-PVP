@@ -34,7 +34,6 @@ public class TeleportListener implements Listener {
 					.getName());
 			MultiverseWorld fromWorld = wm.getMVWorld(e.getFrom().getWorld()
 					.getName());
-			System.out.println(toWorld.getName());
 			if (toWorld != fromWorld
 					&& !p.getGameMode().equals(toWorld.getGameMode())) {
 				p.setGameMode(toWorld.getGameMode());
