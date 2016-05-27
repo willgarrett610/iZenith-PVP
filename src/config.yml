@@ -1,0 +1,39 @@
+join_message: '&8[&aIZ&8] &7%player%'
+leave_message: '&8[&cIZ&8] &7%player%'
+chat_format: '%player% -> %message%'
+commandspy:
+  filters:
+    default:
+    - 'c give'
+    - 'c i'
+    - 'c item'
+    all:
+    - '*'
+  players:
+    bobmandude9889:
+      filter: default
+colors:
+  - 'Visitor,7'
+  - 'Member,a'
+  - 'MemberP,2'
+  - 'Trusted,b'
+  - 'Mod,c'
+  - 'Admin,4'
+  
+ranks:
+  - "&7Visitor"
+  - "&aMember"
+  - "&a&lMember Plus"
+  - "&bTrusted"
+  - "&9Mod"
+  - "&cAdmin"
+  - "&4Owner"
+
+inventory_interact_worlds:
+  - "spawn"
+  
+player_list_message: "&7&l&m--------------[&r &6&liZenith &f&lMinecraft &7&l&m]--------------\n&4&lSERVER IS STILL IN DEVELOPMENT.\n&4&lPLEASE REPORT ANY ISSUES USING /report <message>\n&7Online Players:"
+
+tab_info:
+  header: "&7&l&m--------&f&lWelcome to &6&liZenith&7&l&m--------"
+  footer: "&7&l&m--------[&9&lDonate: &5&lstore.izenith.net&7&l&m]--------\n&7&l&m   --------[&9&lTeamSpeak: &5&ltalk.izenith.net&7&l&m]--------"

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="EclipseModuleManager">
+    <libelement value="file://PermissionsEx.jar" />
+    <libelement value="file://Multiverse-Core-2.4.jar" />
+    <libelement value="file://spigot-BT42_1.8.8_07.30.jar" />
+    <libelement value="file://PlotSquared.jar" />
+    <libelement value="file://Vault.jar" />
+    <libelement value="file://Essentials-2.x-SNAPSHOT.jar" />
+    <libelement value="file://Custom GUI.jar" />
+    <libelement value="file://ProtocolLib.jar" />
+    <src_description expected_position="0">
+      <src_folder value="file://$MODULE_DIR$/src" expected_position="0" />
+    </src_description>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/bin" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="jdk" jdkName="JavaSE-1.7" jdkType="JavaSDK" />
+    <orderEntry type="module-library">
+      <library name="PermissionsEx.jar">
+        <CLASSES>
+          <root url="file://PermissionsEx.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Multiverse-Core-2.4.jar">
+        <CLASSES>
+          <root url="file://Multiverse-Core-2.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="spigot-BT42_1.8.8_07.30.jar">
+        <CLASSES>
+          <root url="file://spigot-BT42_1.8.8_07.30.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="PlotSquared.jar">
+        <CLASSES>
+          <root url="file://PlotSquared.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Vault.jar">
+        <CLASSES>
+          <root url="file://Vault.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Essentials-2.x-SNAPSHOT.jar">
+        <CLASSES>
+          <root url="file://Essentials-2.x-SNAPSHOT.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Custom GUI.jar">
+        <CLASSES>
+          <root url="file://Custom GUI.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="ProtocolLib.jar">
+        <CLASSES>
+          <root url="file://ProtocolLib.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="Essentials-2.x-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="spigot_server" level="project" />
+    <orderEntry type="library" name="Custom GUI" level="project" />
+  </component>
+</module>

@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="Essentials-2.x-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Downloads/Plugins/Essentials-2.x-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Plugins/FrameAPI.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Plugins/Multiverse-Core-2.5.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Plugins/NV copy.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Plugins/NV.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Plugins/PermissionsEx-1.23.3.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Plugins/PlotMe-Core.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Plugins/PlotSquared.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Plugins/ProtocolLib.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Plugins/Vault.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

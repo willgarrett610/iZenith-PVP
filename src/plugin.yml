@@ -1,0 +1,141 @@
+name: IZenith
+version: 1.0
+main: net.izenith.Main.Main
+author: bobmandude9889
+depend: [Multiverse-Core,PermissionsEx,Vault,Essentials]
+
+commands:
+  commandspy:
+    description: Commandspy
+    usage: /<command>
+    aliases: ['commandpsy','cs']
+  lel:
+    description: Lol
+    usage: /<command>
+    aliases: ['lawl']
+  createclock:
+    description: creates a clock
+    usage: /<command>
+  report:
+    description: Used to report problems
+    usage: /<command>
+  setfloor:
+    description: Change the floor of your plot
+    usage: /<command> <blockid>
+  kit:
+    description: Create and use kits
+    usage: /<command> <kit name>
+    aliases: [kits]
+  gkit:
+    description: Create and remove global kits
+    usage: /<command> <create,remove> <kit name>
+  trusted:
+    description: Warp to trusted world
+    usage: /<command>
+    aliases: [void,tr]
+  ranks:
+    description: List servers ranks
+    usage: /<command>
+  suspend:
+    description: Suspend a player
+    usage: /<command>
+  ip:
+    description: Shows the server's Ip Address
+    usage: /<command>
+  info:
+    description: Warp to info
+    usage: /<command>
+  donated:
+    description: Player donated
+    usage: /<command>
+  worldeditperms:
+    description: Add WE perms
+    usage: /<command>
+  addplot:
+    description: Access to another plot
+    usage: /<command>
+  playtime:
+    description: Get the time the player has played.
+    usage: /<command> <player>
+    aliases: [play,givemearimjobandbitemyear]
+  updatelist:
+    description: Update the tab list
+    usage: /<command>
+  adminchat:
+    description: Send message or toggle
+    usage: /<command>
+    aliases: [ac]
+  clearchat:
+    description: Clear the server chat
+    usage: /<command>
+    aliases: [cc]
+  translate:
+    description: Translate message and send in chat
+    usage: /<command> <message>
+    aliases: [tc]
+  console:
+    description: Runs console commands
+    usage: /<command> <message>
+    aliases: [c,con]
+  getconsolekey:
+    description: Adds a key that can be used for remote console access
+    usage: /<command>
+  rename:
+    description: Renames item in hand
+    usage: /<command> <name>
+    aliases: [re]
+  rskull:
+    description: Refresh plot skulls
+    usage: /<command>
+  ping:
+    description: Show the ping in milliseconds
+    usage: /<command>
+
+permissions:
+  commandspy.use:
+    description: gives access to /commandspy
+    default: OP
+  clock.create:
+    description: Gives access to /createclo
+    default: OP
+  setfloor.others:
+    description: Set other player plot floor
+    default: OP
+  kit.use:
+    description: Use Kits
+    default: OP
+  gkit.use:
+    description: Create and remove Global Kits
+    default: OP
+  hub.suspend:
+    description: Suspend players
+    default: OP
+  hub.cc:
+    description: Clear Chats
+    default: OP
+  report.admin:
+    description: gives access to /report list and remove
+    default: OP
+  izenith.adminchat:
+    description: Can talk in admin chat
+    default: OP
+  izenith.updatelist:
+    description: Gives /updatelist
+    default: OP
+  izenith.console:
+    description: Gives /console
+    default: OP
+  bow.dick:
+    description: Allows bow penis
+    default: OP
+  console.remoteaccess:
+    description: Allows access to a key used for remote access
+  izenith.rename:
+    description: Renames the item in hand
+    default: OP
+  spawn.interact:
+    description: Allows inventory interaction at spawn
+    default: OP
+  plot.rskull:
+    description: Allows refreshing of plot skulls
+    default: OP
