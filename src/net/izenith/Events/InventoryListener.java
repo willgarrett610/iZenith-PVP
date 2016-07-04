@@ -7,12 +7,12 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 import net.izenith.Main.Util;
 
-public class InventoryClickListener implements Listener {
+public class InventoryListener implements Listener {
 
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
 		Player player = (Player) e.getWhoClicked();
-		if(!player.hasPermission("spawn.interact") && Util.getConfig().getStringList("inventory_interact_worlds").contains(player.getWorld().getName())){
+		if (!player.hasPermission("spawn.interact") && Util.getConfig().getStringList("inventory_interact_worlds").contains(player.getWorld().getName())) {
 			e.setCancelled(true);
 		}
 	}

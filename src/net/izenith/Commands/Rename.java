@@ -29,11 +29,11 @@ public class Rename implements HubCommand {
 		// TODO Auto-generated method stub
 		Player p = (Player) sender;
 
-		if (p.getItemInHand().equals(Material.AIR)) {
+		if (p.getInventory().getItemInMainHand() == null) {
 			p.sendMessage(ChatColor.RED + "You can't rename nothing.");
 			return;
 		}
-		ItemStack i = p.getItemInHand();
+		ItemStack i = p.getInventory().getItemInMainHand();
 		ItemMeta im = i.getItemMeta();
 		String name = "";
 		for (String s : args) {
@@ -47,8 +47,7 @@ public class Rename implements HubCommand {
 		}
 		im.setDisplayName((ChatColor.translateAlternateColorCodes('&', name)));
 		i.setItemMeta(im);
-		p.setItemInHand(i);
-
+		p.getInventory().setItemInMainHand(i);
 	}
 
 	@Override

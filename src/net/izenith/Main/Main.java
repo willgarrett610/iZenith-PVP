@@ -11,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import net.izenith.Commands.CommandSpy;
 import net.izenith.Commands.HubCommand;
+import net.izenith.Kit.KitManager;
 
 public class Main extends JavaPlugin {
 	
@@ -24,7 +25,9 @@ public class Main extends JavaPlugin {
 		Util.loadAllOnlineTimes();
 		Util.updatePlayerList();
 		Util.LoadEssentials();
-		System.out.println("iZenith Enabled");
+		Util.setupAutoBroadcast();
+		KitManager.init();
+		KitManager.loadKits();
 	}
 	
 	@Override
@@ -34,7 +37,6 @@ public class Main extends JavaPlugin {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		System.out.println(cmd.getName());
 		if (Vars.commands == null)
 			Vars.init(this);
 		for (HubCommand hC : Vars.commands) {

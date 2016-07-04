@@ -11,8 +11,6 @@ import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 
-import net.izenith.Main.IPlayerHandler;
-import net.izenith.Main.Util;
 import net.md_5.bungee.api.ChatColor;
 
 public class TeleportListener implements Listener {
@@ -38,16 +36,6 @@ public class TeleportListener implements Listener {
 					&& !p.getGameMode().equals(toWorld.getGameMode())) {
 				p.setGameMode(toWorld.getGameMode());
 			}
-		}
-		if (e.getTo().getWorld().getName().equals("spawn")) {
-			Bukkit.getScheduler().scheduleSyncDelayedTask(Util.getMain(),
-					new Runnable() {
-						@Override
-						public void run() {
-							IPlayerHandler.getPlayer(p).getKit("nether_star",
-									false);
-						}
-					}, 40l);
 		}
 	}
 }

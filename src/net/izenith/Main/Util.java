@@ -6,10 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,29 +18,56 @@ import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
+import com.comphenix.protocol.wrappers.nbt.NbtCompound;
+import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.earth2me.essentials.Essentials;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 import net.izenith.Commands.AdminChat;
+import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
+@SuppressWarnings("deprecation")
 public class Util {
 
 	public static Essentials ess;
 
+	private static Economy econ;
+
+	public static WorldGuardPlugin getWorldGuard() {
+		return (WorldGuardPlugin) Util.getMain().getServer().getPluginManager().getPlugin("WorldGuard");
+	}
+
 	public static void LoadEssentials() {
 		ess = (Essentials) Bukkit.getServer().getPluginManager().getPlugin("Essentials");
 	}
-	
+
+	public static Economy getEconomy() {
+		if (econ == null) {
+			if (getServer().getPluginManager().getPlugin("Vault") == null) {
+				return null;
+			}
+			RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+			if (rsp == null) {
+				return null;
+			}
+			econ = rsp.getProvider();
+		}
+		return econ;
+	}
+
 	public static void line(Location l1, Location l2, Material material) {
 		double xSlope = (l1.getBlockX() - l2.getBlockX());
 		double ySlope = (l1.getBlockY() - l2.getBlockY()) / xSlope;
@@ -53,6 +80,53 @@ public class Util {
 		}
 	}
 
+	public static String[] playerInventoryToBase64(PlayerInventory playerInventory) throws IllegalStateException {
+		// get the main content part, this doesn't return the armor
+		String content = itemStackArrayToBase64(playerInventory.getContents());
+		String armor = itemStackArrayToBase64(playerInventory.getArmorContents());
+
+		return new String[] { content, armor };
+	}
+
+	public static String itemStackArrayToBase64(ItemStack[] items) throws IllegalStateException {
+		try {
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
+
+			// Write the size of the inventory
+			dataOutput.writeInt(items.length);
+
+			// Save every element in the list
+			for (int i = 0; i < items.length; i++) {
+				dataOutput.writeObject(items[i]);
+			}
+
+			// Serialize that array
+			dataOutput.close();
+			return Base64Coder.encodeLines(outputStream.toByteArray());
+		} catch (Exception e) {
+			throw new IllegalStateException("Unable to save item stacks.", e);
+		}
+	}
+
+	public static ItemStack[] itemStackArrayFromBase64(String data) throws IOException {
+		try {
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
+			BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
+			ItemStack[] items = new ItemStack[dataInput.readInt()];
+
+			// Read the serialized inventory
+			for (int i = 0; i < items.length; i++) {
+				items[i] = (ItemStack) dataInput.readObject();
+			}
+
+			dataInput.close();
+			return items;
+		} catch (ClassNotFoundException e) {
+			throw new IOException("Unable to decode class type.", e);
+		}
+	}
+
 	public static String parseColors(String message) {
 		return ChatColor.translateAlternateColorCodes('&', message);
 	}
@@ -60,6 +134,14 @@ public class Util {
 	public static boolean contains(char[] array, Character character) {
 		for (Character c : array) {
 			if (c == character)
+				return true;
+		}
+		return false;
+	}
+
+	public static boolean contains(String[] array, String regex) {
+		for (String s : array) {
+			if (s.equalsIgnoreCase(regex))
 				return true;
 		}
 		return false;
@@ -129,16 +211,33 @@ public class Util {
 		return is;
 	}
 
+	public static void giveItem(Player player, ItemStack item){
+		PlayerInventory inv = player.getInventory();
+		for(int i = 0; i < inv.getSize(); i++){
+			if(inv.getItem(i) == null){
+				inv.setItem(i,item);
+				return;
+			}
+		}
+		player.getWorld().dropItem(player.getLocation(), item);
+	}
+	
+	//	public static ItemStack enchant(ItemStack item, Player player){
+	//		int ver = ((CraftPlayer) player).getHandle().playerConnection.networkManager.getVersion();
+	//	}
+
 	public static void initScoreboard() {
 		try {
-			Vars.scoreboard.registerNewTeam("Visitor").setPrefix(parseColors("&7"));
-			Vars.scoreboard.registerNewTeam("Member").setPrefix(parseColors("&a"));
-			Vars.scoreboard.registerNewTeam("MemberP").setPrefix(parseColors("&a"));
-			Vars.scoreboard.registerNewTeam("Trusted").setPrefix(parseColors("&b"));
-			Vars.scoreboard.registerNewTeam("Mod").setPrefix(parseColors("&9"));
-			Vars.scoreboard.registerNewTeam("Developer").setPrefix(parseColors("&e"));
+			Vars.scoreboard.registerNewTeam("Member").setPrefix(parseColors("&7"));
+			Vars.scoreboard.registerNewTeam("Iron").setPrefix(parseColors("&f"));
+			Vars.scoreboard.registerNewTeam("Gold").setPrefix(parseColors("&6"));
+			Vars.scoreboard.registerNewTeam("Emerald").setPrefix(parseColors("&a"));
+			Vars.scoreboard.registerNewTeam("Diamond").setPrefix(parseColors("&b"));
 			Vars.scoreboard.registerNewTeam("Admin").setPrefix(parseColors("&c"));
 			Vars.scoreboard.registerNewTeam("Owner").setPrefix(parseColors("&4"));
+			Team ghost = Vars.scoreboard.registerNewTeam("Ghost");
+			ghost.setNameTagVisibility(NameTagVisibility.NEVER);
+			ghost.setCanSeeFriendlyInvisibles(false);
 		} catch (Exception e) {
 		}
 		for (Team t : Vars.scoreboard.getTeams()) {
@@ -170,69 +269,14 @@ public class Util {
 		return getMain().getConfig();
 	}
 
-	public static String[] playerInventoryToBase64(PlayerInventory playerInventory) throws IllegalStateException {
-		// get the main content part, this doesn't return the armor
-		String content = itemStackArrayToBase64(playerInventory.getContents());
-		String armor = itemStackArrayToBase64(playerInventory.getArmorContents());
-
-		return new String[] { content, armor };
-	}
-
-	public static String itemStackArrayToBase64(ItemStack[] items) throws IllegalStateException {
-		try {
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
-
-			// Write the size of the inventory
-			dataOutput.writeInt(items.length);
-
-			// Save every element in the list
-			for (int i = 0; i < items.length; i++) {
-				dataOutput.writeObject(items[i]);
-			}
-
-			// Serialize that array
-			dataOutput.close();
-			return Base64Coder.encodeLines(outputStream.toByteArray());
-		} catch (Exception e) {
-			throw new IllegalStateException("Unable to save item stacks.", e);
-		}
-	}
-
-	public static ItemStack[] itemStackArrayFromBase64(String data) throws IOException {
-		try {
-			ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
-			BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
-			ItemStack[] items = new ItemStack[dataInput.readInt()];
-
-			// Read the serialized inventory
-			for (int i = 0; i < items.length; i++) {
-				items[i] = (ItemStack) dataInput.readObject();
-			}
-
-			dataInput.close();
-			return items;
-		} catch (ClassNotFoundException e) {
-			throw new IOException("Unable to decode class type.", e);
-		}
-	}
-
-	public static void setGlobalKit(Player player, String name) {
-		name = name.toLowerCase();
-		String[] arrayKit = playerInventoryToBase64(player.getInventory());
-		List<String> kit = new ArrayList<String>();
-		kit.add(arrayKit[0]);
-		kit.add(arrayKit[1]);
-		getConfig().set("kits.global." + name, kit);
+	public static void saveConfig(){
 		getMain().saveConfig();
 	}
-
-	public static void removeGlobalKit(String name) {
-		name = name.toLowerCase();
-		getConfig().set("kits.global." + name, null);
-		getMain().saveConfig();
+	
+	public static void reloadConfig(){
+		getMain().reloadConfig();
 	}
-
+	
 	public static boolean hasJoined(Player player) {
 		File dataFolder = new File(Util.getMain().getDataFolder().getPath() + System.getProperty("file.separator") + "players");
 		return new File(dataFolder.getPath() + System.getProperty("file.separator") + player.getUniqueId() + ".yml").exists();
@@ -279,9 +323,11 @@ public class Util {
 	}
 
 	public static FileConfiguration getOfflinePlayerFile(String name) {
-		for (File file : new File(Util.getMain().getDataFolder().getPath() + System.getProperty("file.separator") + "players").listFiles()) {
+		for (File file : new File(Util.getMain().getDataFolder().getPath(), "players").listFiles()) {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-			return config;
+			if (config.getString("last_name").equalsIgnoreCase(name)) {
+				return config;
+			}
 		}
 		return null;
 	}
@@ -320,7 +366,7 @@ public class Util {
 			ret += s + "\n";
 		}
 		if (ret.length() > 2) {
-			ret = ret.substring(0, ((ret.length() - 2) - seperator.length()) + 1);
+			ret = ret.substring(0, (ret.length() - seperator.length()) - 1);
 		}
 		return ret;
 	}
@@ -338,6 +384,63 @@ public class Util {
 		return Bukkit.getPlayer(s) != null;
 	}
 
+	public static String formatTime(long timeMili) {
+		String suffix = "Miliseconds";
+		double time = timeMili;
+		if (time > 1000) {
+			time /= 1000;
+			suffix = "Seconds";
+		}
+		if (time > 60) {
+			time /= 60;
+			suffix = "Minutes";
+		}
+		if (time > 60) {
+			time /= 60;
+			suffix = "Hours";
+		}
+
+		DecimalFormat df = new DecimalFormat("#.#");
+		return df.format(time) + " " + suffix;
+	}
+
+	public static void setupAutoBroadcast() {
+		final List<String> messages = getConfig().getStringList("auto_messages");
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(getMain(), new Runnable() {
+			@Override
+			public void run() {
+				String message = messages.get(Vars.messageIndex);
+				Bukkit.broadcastMessage("");
+				Bukkit.broadcastMessage(parseColors("&8&m---------------------&f\u2606&4&liZenith&f&lPVP&f\u2606&8&m---------------------"));
+				Bukkit.broadcastMessage("");
+				Bukkit.broadcastMessage(parseColors(message));
+				Bukkit.broadcastMessage("");
+				Bukkit.broadcastMessage(parseColors("&8&m-----------------------------------------------------"));
+				Bukkit.broadcastMessage("");
+				Vars.messageIndex++;
+				if (Vars.messageIndex == messages.size()) {
+					Vars.messageIndex = 0;
+				}
+			}
+		}, getConfig().getLong("broadcast_delay"), getConfig().getLong("broadcast_delay"));
+	}
+
+	//	public static void registerConv() {
+	//		ConfigurationSection conv = getConfig().getConfigurationSection("block_conv");
+	//		BlockRemapperControl remap_1_7_5 = ProtocolSupportAPI.getBlockRemapper(ProtocolVersion.MINECRAFT_1_7_5);
+	//		BlockRemapperControl remap_1_7_10 = ProtocolSupportAPI.getBlockRemapper(ProtocolVersion.MINECRAFT_1_7_10);
+	//		for (String from : conv.getKeys(false)) {
+	//			String[] fromSplit = from.split(",");
+	//			int idFrom = Integer.parseInt(fromSplit[0]);
+	//			int dataFrom = Integer.parseInt(fromSplit[1]);
+	//			String[] toSplit = conv.getString(from).split(",");
+	//			int idTo = Integer.parseInt(toSplit[0]);
+	//			int dataTo = Integer.parseInt(toSplit[1]);
+	//			//			remap_1_7_5.setRemap(idFrom, dataFrom, idTo, dataTo);
+	//			//			remap_1_7_10.setRemap(idFrom, dataFrom, idTo, dataTo);
+	//		}
+	//	}
+
 	/*
 	 * public static ConnectionServer openRemoteConsoleServer(){ PacketHandler
 	 * handler = new PacketHandler(); handler.addListener("key", new
@@ -351,4 +454,41 @@ public class Util {
 	 * e.printStackTrace(); } }
 	 */
 
+	public static void enchant(ItemStack item) {
+		item.addUnsafeEnchantment(Enchantment.SILK_TOUCH, 32);
+	}
+
+	private static void addGlow(ItemStack[] stacks) {
+		for (ItemStack stack : stacks) {
+			if (stack != null) {
+				// Only update those stacks that have our flag enchantment
+				if (stack.getEnchantmentLevel(Enchantment.SILK_TOUCH) == 32) {
+					NbtCompound compound = (NbtCompound) NbtFactory.fromItemTag(stack);
+					compound.put(NbtFactory.ofList("ench"));
+				}
+			}
+		}
+	}
+
+	public static String formatDouble(Double num){
+		String s = num.toString();
+		String[] split = s.split("\\.");
+		String format = "";
+		char[] chars = split[0].toCharArray();
+		String append = "";
+		for(int i = 0; i < chars.length; i++){
+			append = chars[chars.length - (i+1)] + append;
+			if((i + 1) % 3 == 0 || i == chars.length - 1){
+				format = append + "," + format;
+				append = "";
+			}
+		}
+		return format.substring(0,format.length() - 1) + "." + split[1];
+	}
+	
+	public static String formatDouble(Double num, String format){
+		DecimalFormat df = new DecimalFormat(format);
+		return df.format(num);
+	}
+	
 }

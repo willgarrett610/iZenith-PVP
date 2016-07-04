@@ -4,42 +4,45 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Matcher;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_9_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Team;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.massivecraft.factions.Factions;
+import com.massivecraft.factions.Rel;
+import com.massivecraft.factions.entity.Faction;
+import com.massivecraft.factions.entity.MPlayer;
 
-import net.izenith.Commands.Translate;
+import net.izenith.Kit.Kit;
 
 public class IPlayer {
 
 	public Player player;
 	public YamlConfiguration config;
-	private File file;
+	public File file;
 	public long joinTime = -1;
 	public long afkStartTime = -1;
+	public boolean ghost = false;
+	public boolean gotKit = false;
+	public Party party = null;
 
 	public IPlayer(Player player) {
 		this.player = player;
-		File dataFolder = new File(Util.getMain().getDataFolder().getPath(),
-				"players");
+		File dataFolder = new File(Util.getMain().getDataFolder().getPath(), "players");
 		if (!dataFolder.exists())
 			dataFolder.mkdir();
-		this.file = new File(dataFolder.getPath(), player.getUniqueId()
-				+ ".yml");
+		this.file = new File(dataFolder.getPath(), player.getUniqueId() + ".yml");
 		this.config = YamlConfiguration.loadConfiguration(file);
 	}
 
@@ -93,30 +96,13 @@ public class IPlayer {
 		}
 	}
 
-	public void getKit(String name, boolean message) {
-		name = name.toLowerCase();
-		List<String> kit = config.getStringList("kits." + name);
-		if (kit.size() == 0)
-			kit = Util.getConfig().getStringList("kits.global." + name);
-		if (kit != null) {
-			try {
-				ItemStack[] contents = Util
-						.itemStackArrayFromBase64(kit.get(0));
-				ItemStack[] armor = Util.itemStackArrayFromBase64(kit.get(1));
-				player.getInventory().setContents(contents);
-				player.getInventory().setArmorContents(armor);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (message)
-			player.sendMessage(ChatColor.GREEN + "You have been given the kit "
-					+ ChatColor.BLUE + name);
+	public String getRankName() {
+		String pref = PermissionHandler.getGroup(player).getPrefix();
+		return Util.parseColors(pref + player.getName());
 	}
 
 	public String getColoredName(boolean truncate) {
-		ChatColor color = Util.getGroupColor(PermissionHandler
-				.getGroupName(player));
+		ChatColor color = Util.getGroupColor(PermissionHandler.getGroupName(player));
 		String name = player.getName();
 		int length = name.length();
 		if (length > 14 && truncate) {
@@ -128,11 +114,13 @@ public class IPlayer {
 
 	@SuppressWarnings("deprecation")
 	public void setTeam() {
-		for (Team t : Vars.teams) {
-			if (t.getName().equalsIgnoreCase(
-					PermissionHandler.getGroupName(player))) {
-				t.addPlayer(player);
-				return;
+		player.setPlayerListName(getColoredName(true));
+		if (!isGhost()) {
+			for (Team t : Vars.teams) {
+				if (t.getName().equalsIgnoreCase(PermissionHandler.getGroupName(player))) {
+					t.addPlayer(player);
+					return;
+				}
 			}
 		}
 	}
@@ -197,185 +185,175 @@ public class IPlayer {
 		return config.getBoolean("translate");
 	}
 
-	public int getPing(){
+	public int getPing() {
 		CraftPlayer player = (CraftPlayer) this.player;
 		int ping = player.getHandle().ping;
 		return ping;
 	}
-	
-	public String getPingWithColor(){
-		CraftPlayer player = (CraftPlayer) this.player;
-		int ping = player.getHandle().ping;
+
+	public String getPingWithColor() {
+		int ping = getPing();
 		return (ping <= 100 ? ChatColor.GREEN : ping <= 200 ? ChatColor.YELLOW : ChatColor.RED).toString() + ping;
 	}
-	
-	/*
-	 * public void sendChatMessage(String text){ // Get format for the group of
-	 * a player from the config String format =
-	 * Util.getConfig().getString("chat." +
-	 * PermissionHandler.getGroupName(player)); // Replace the tags with there
-	 * values String message = format.replaceAll("%player%",
-	 * player.getDisplayName()); message = message.replaceAll("%prefix%",
-	 * PermissionHandler.getGroup(player).getPrefix()); // Use Util to convert
-	 * from & code to ChatColors message = Util.parseColors(message);
-	 * 
-	 * // Bukkit replaces formats message colors by default // ut = untranslated
-	 * String pMessage = Matcher.quoteReplacement(text); String utMessage =
-	 * message.replaceAll("%message%", pMessage);
-	 * 
-	 * // Make sure that a format for the players group exists if (format !=
-	 * null) { // Loop through players rather than broadcast so that a different
-	 * utMessage could be set per player ie. Colored names for mentions for
-	 * (final Player player : Util.getMain().getServer().getOnlinePlayers()) //
-	 * Check if the current player is being mentioned and is not themselves if
-	 * (Util.containsIgnoreCase(pMessage, player.getName()) &&
-	 * !player.equals(player)) { // Get index of players name for replacement
-	 * int i = utMessage.toLowerCase().indexOf(player.getName().toLowerCase());
-	 * // Color player name String utMessageP = utMessage.substring(0, i) +
-	 * ChatColor.RED + ChatColor.BOLD + utMessage.substring(i,
-	 * player.getName().length() + i) +
-	 * ChatColor.getByChar(format.charAt(format.indexOf("%utMessage%") - 1)) +
-	 * utMessage.substring(player.getName().length() + i);
-	 * player.sendMessage(utMessageP); // Send a tune to notify player
-	 * player.playSound(player.getLocation(), Sound.NOTE_PLING, 1f, 1f);
-	 * Util.getMain
-	 * ().getServer().getScheduler().scheduleSyncDelayedTask(Util.getMain(), new
-	 * Runnable() {
-	 * 
-	 * @Override public void run() { player.playSound(player.getLocation(),
-	 * Sound.NOTE_PLING, 1f, 1.25f); } }, 10l); } else { // Send normal
-	 * utMessage if the player was not mentioned player.sendMessage(utMessage);
-	 * } } }
-	 */
 
-	public void sendChatMessage(final String text) {
-		final IPlayer iPlayer = this;
-		final String message = Util.parseColors(Matcher.quoteReplacement(text).replaceAll("\"",
-				"\\\\\""));
-		for (final Player player : Bukkit.getOnlinePlayers()) {
-			if (Util.ess.getUser(player).isIgnoredPlayer(
-					Util.ess.getUser(iPlayer.player))) {
-				return;
-			}
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					
-					String command = null;
-					String name = player.getName();
-					String translation = "No translation";
-					String toLanguage = IPlayerHandler.getPlayer(player)
-							.getLanguage();
-					Language toLanguageEnum = Language.getByCode(toLanguage);
-					Language playerLanguageEnum = Language
-							.getByCode(getLanguage());
-					if (getTranslate()) {
-						String fromLanguage = Translate.detectLanguage(message);
-						translation = Translate.getTranslation(
-								"No translation", "en", toLanguage);
+	@SuppressWarnings("deprecation")
+	public void setGhost(boolean ghost) {
+		this.ghost = ghost;
+		setTeam();
+		config.set("ghost", ghost);
+		try {
+			config.save(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (!ghost) {
+			player.removePotionEffect(PotionEffectType.INVISIBILITY);
+		} else {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 9999999, 0));
 
-						if (!fromLanguage.equals(toLanguage)) {
-							translation = Translate.getTranslation(message,
-									fromLanguage, toLanguage);
-							if (translation == null
-									|| translation.equals(message)) {
-								translation = Translate.getTranslation(
-										"No translation", "en", toLanguage);
-							}
-						}
-					}
-					
-					String messageFormat = "";
-					for(String part : message.split(" ")){
-						if(Util.isURL(part)){
-							messageFormat += "{\"text\":\""
-									+ part
-									+ " \",\"color\":\"aqua\",\"underlined\":true,\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + part + "\"}"
-									+ ",\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Click to open link\",\"color\":\"blue\"}"
-									+ "]}}},";
-						} else if (player.getName().toLowerCase().equals(part.toLowerCase()) && player != iPlayer.player){ 
-							messageFormat += "{\"text\":\""
-									+ part
-									+ " \",\"color\":\"red\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/msg " + iPlayer.player.getName() + " \"}"
-									+ ",\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Click to reply\",\"color\":\"blue\"}"
-									+ "]}}},";
-						}else {
-							messageFormat += "{\"text\":\""
-									+ part
-									+ " \",\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Language: \",\"color\":\"blue\"},"
-									+ "{\"text\":\""
-									+ (toLanguageEnum == null ? "ENGLISH"
-											: toLanguageEnum.name())
-									+ "\\n\",\"color\":\"green\"},"
-									+ "{\"text\":\"" + translation
-									+ "\",\"color\":\"white\"}]}}},";
-						}
-					}
-					messageFormat = messageFormat.substring(0,messageFormat.length() - 1);
-					
-					if (Util.containsIgnoreCase(message, name) && !iPlayer.player.getName().toLowerCase().equals(name.toLowerCase())) {
-						player.playSound(player.getLocation(),
-								Sound.NOTE_PLING, 1f, 1f);
-						Util.getMain()
-								.getServer()
-								.getScheduler()
-								.scheduleSyncDelayedTask(Util.getMain(),
-										new Runnable() {
-											@Override
-											public void run() {
-												player.playSound(
-														player.getLocation(),
-														Sound.NOTE_PLING, 1f,
-														1.25f);
-											}
-										}, 10l);
-					}
-					command = "tellraw "
-							+ name
-							+ " [\"\",{\"text\":\""
-							+ iPlayer.getColoredName(false)
-							+ " \",\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\""
-							+ "extra\":[{\"text\":\""
-							+ PermissionHandler
-									.getGroupName(iPlayer.player)
-							+ "\\n\",\"color\":\""
-							+ Util.getGroupColor(
-									PermissionHandler
-											.getGroupName(iPlayer.player))
-									.name().toLowerCase()
-							+ "\"},"
-							+ "{\"text\":\"Language: \",\"color\":\"blue\"},{\"text\":\""
-							+ (playerLanguageEnum == null ? "ENGLISH"
-									: playerLanguageEnum.name())
-							+ "\\n\",\"color\":\"green\"},"
-							+ "{\"text\":\"Playtime: \",\"color\":\"blue\"},{\"text\":\""
-							+ getOnlineTimeHours()
-							+ " hours\",\"color\":\"green\"}]}}},{\"text\":\"\u2192 \",\"color\":\"black\"},"
-							+ messageFormat
-							+ "]";
-					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+			player.setHealth(40);
+
+			for (Team team : Vars.teams) {
+				if (team.getName().equals("Ghost")) {
+					team.addPlayer(player);
 				}
-			}).start();
+			}
 		}
 	}
 
+	public void loadGhost() {
+		setGhost(config.getBoolean("ghost"));
+	}
+
+	public boolean isGhost() {
+		return ghost;
+	}
+
+	public void sendChatMessage(String text) {
+		MPlayer mPlayer = MPlayer.get((Object) player);
+		Faction faction = mPlayer.getFaction();
+		for (final Player player : Bukkit.getOnlinePlayers()) {
+			MPlayer itMPlayer = MPlayer.get((Object) player);
+			Rel rel = faction.getRelationTo(itMPlayer.getFaction());
+
+			ChatColor colorCode = faction.getColorTo(itMPlayer);
+
+			rel = mPlayer.getRelationTo(faction);
+			String prefix = rel.equals(Rel.RECRUIT) ? "-" : rel.equals(Rel.MEMBER) ? "+" : rel.equals(Rel.OFFICER) ? "*" : "**";
+			
+			String factionName = isInFaction() ? "&0[" + colorCode + prefix + faction.getName() + "&0]&r " : "";
+			String message = Util.parseColors(factionName + getRankName() + " &0\u2192 &f" + text);
+			if (!this.player.equals(player) && Util.containsIgnoreCase(message, player.getName())) {
+
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 1f, 1f);
+				Util.getMain().getServer().getScheduler().scheduleSyncDelayedTask(Util.getMain(), new Runnable() {
+					@Override
+					public void run() {
+						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 1f, 1.25f);
+					}
+				}, 10l);
+
+				int index = message.toLowerCase().indexOf(player.getName().toLowerCase());
+				String newMessage = message.substring(0, index) + ChatColor.RED + message.substring(index, index + player.getName().length()) + ChatColor.WHITE + message.substring(index + player.getName().length(), message.length());
+				player.sendMessage(newMessage);
+			} else {
+				player.sendMessage(message);
+			}
+		}
+	}
+
+	public boolean isInFaction() {
+		MPlayer mPlayer = MPlayer.get((Object) player);
+		Faction faction = mPlayer.getFaction();
+		String id = faction.getId(); 
+		return !(id.equals(Factions.ID_NONE) || id.equals(Factions.ID_SAFEZONE) || id.equals(Factions.ID_WARZONE));
+	}
+
 	public void sendTabFootHeader() {
-		PacketContainer pc = Vars.protocolManager
-				.createPacket(PacketType.Play.Server.PLAYER_LIST_HEADER_FOOTER);
-		pc.getChatComponents()
-				.write(0,
-						WrappedChatComponent.fromText(Util
-								.parseColors("&f   &8&m------------------&f\u2606&4&liZenith&f&lPVP&f\u2606&8&m------------------")))
-				.write(1,
-						WrappedChatComponent.fromText(Util
-								.parseColors("&8&l&m  --------&f\u2606&4&lDonate: &f&lstore.izenith.net&f\u2606&8&l&m--------"
-										+ "\n&8&l&m--------&f\u2606&4&lTeamSpeak: &f&ltalk.izenith.net&f\u2606&8&l&m--------"
-										+ "\n&fPing: " + this.getPingWithColor())));
+		PacketContainer pc = Vars.protocolManager.createPacket(PacketType.Play.Server.PLAYER_LIST_HEADER_FOOTER);
+
+		String header = replacePlaceholders(Util.getConfig().getString("tab.header"));
+		String footer = replacePlaceholders(Util.getConfig().getString("tab.footer"));
+		
+		pc.getChatComponents().write(0, WrappedChatComponent.fromText(Util.parseColors(header))).write(1, WrappedChatComponent.fromText(Util.parseColors(footer)));
 		try {
 			Vars.protocolManager.sendServerPacket(player, pc);
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public String replacePlaceholders(String string){
+		String kd = getKD();
+
+		Double bal = Util.getEconomy().getBalance(player);
+		String balFormat = Util.formatDouble(bal);
+		
+		return string
+				.replaceAll("\\{ONLINE_PLAYERS\\}", Bukkit.getOnlinePlayers().size() + "")
+				.replaceAll("\\{PING\\}", getPingWithColor())
+				.replaceAll("\\{KILLS\\}", getKills().intValue() + "")
+				.replaceAll("\\{DEATHS\\}", getDeaths().intValue() + "")
+				.replaceAll("\\{KD\\}", kd)
+				.replaceAll("\\{BALANCE\\}", balFormat);
+	}
+
+	public void setLastUse(String world, Kit kit, long time) {
+		config.set("last_use." + world + "." + kit.name, time);
+		try {
+			config.save(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public long getLastUse(String world, Kit kit) {
+		String path = "last_use." + world + "."  + kit.name;
+		if (config.contains(path))
+			return config.getLong(path);
+		else
+			return 0;
+	}
+
+	public void setDeaths(double deaths) {
+		config.set("deaths", deaths);
+		try {
+			config.save(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void setKills(double kills) {
+		config.set("kills", kills);
+		try {
+			config.save(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public Double getDeaths() {
+		if (config.contains("deaths"))
+			return config.getDouble("deaths");
+		return 0d;
+	}
+
+	public Double getKills() {
+		if (config.contains("kills"))
+			return config.getDouble("kills");
+		return 0d;
+	}
+
+	public String getKD() {
+		String kd = "";
+		if (this.getDeaths() == 0) {
+			kd = getKills().toString();
+		} else {
+			DecimalFormat df = new DecimalFormat("#.##");
+			kd = df.format(new Double(this.getKills()) / new Double(this.getDeaths()));
+		}
+		return kd;
 	}
 
 }
