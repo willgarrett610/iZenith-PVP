@@ -43,7 +43,6 @@ public class ServerListHandler implements Listener {
 	@SuppressWarnings("deprecation")
 	public void handlePing(WrappedServerPing ping) {
 		ping.setVersionName("iZenith 1.7.x, 1.8.x, 1.9.x");
-		System.out.println("Sending player list");
 		List<String> playerNames = new ArrayList<String>();
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			playerNames.add(IPlayerHandler.getPlayer(player).getColoredName(false));
