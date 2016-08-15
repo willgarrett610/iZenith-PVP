@@ -94,7 +94,9 @@ public class Kit {
 		if (player.hasPermission("kit." + name)) {
 			IPlayer iPlayer = IPlayerHandler.getPlayer(player);
 			long lastUse = iPlayer.getLastUse(world,this);
-			if (System.currentTimeMillis() - lastUse >= cooldown * 1000 || player.hasPermission("kit.bypass_cooldown")) {
+			long timeSinceUse = (System.currentTimeMillis() - lastUse) / 1000;
+			System.out.println("Last use of " + name + " for " + player.getName() + " was " + lastUse / 1000 + " and the current time is " + System.currentTimeMillis() / 1000);
+			if (timeSinceUse >= cooldown || player.hasPermission("kit.bypass_cooldown")) {
 				if (clearInv) {
 					PlayerInventory inv = player.getInventory();
 					inv.setContents(contents);
@@ -104,7 +106,9 @@ public class Kit {
 					}
 				} else {
 					for(ItemStack item : contents){
-						Util.giveItem(player, item);
+						if(item != null){
+							Util.giveItem(player, item);
+						}
 					}
 				}
 				for (PotionEffect pE : effects) {
