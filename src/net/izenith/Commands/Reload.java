@@ -5,6 +5,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permission;
 
 import net.izenith.Main.Util;
+import net.izenith.Main.Vars;
+import net.izenith.Shop.ShopManager;
 import net.md_5.bungee.api.ChatColor;
 
 public class Reload implements HubCommand{
@@ -22,6 +24,8 @@ public class Reload implements HubCommand{
 	@Override
 	public void onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		Util.reloadConfig();
+		ShopManager.reload();
+		Vars.autoMessages = Util.getConfig().getStringList("auto_messages");
 		sender.sendMessage(ChatColor.GREEN + "iZenith config reloaded");
 	}
 

@@ -46,20 +46,36 @@ public class ShopManager implements Listener {
 		dataFolder = new File(Util.getMain().getDataFolder(), "shop");
 
 		priceFile = new File(dataFolder, "prices.yml");
-		priceConfig = YamlConfiguration.loadConfiguration(priceFile);
 
 		configFile = new File(dataFolder, "config.yml");
-		config = YamlConfiguration.loadConfiguration(configFile);
 
 		openSelling = new HashMap<Player, Inventory>();
 		denySell = new ArrayList<Material>();
+		PriceManager.init();
 
+		reload();
+		
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(Util.getMain(), new Runnable() {
+			@Override
+			public void run() {
+				for (Player player : openSelling.keySet()) {
+					updateSellItem(player);
+				}
+			}
+		}, 20l, 20l);
+	}
+
+	public static void reload(){
+		priceConfig = YamlConfiguration.loadConfiguration(priceFile);
+		config = YamlConfiguration.loadConfiguration(configFile);
+
+		PriceManager.priceMap.clear();
+		SectionManager.init();
+		
+		
 		for (String materialName : config.getStringList("deny_sell")) {
 			denySell.add(Material.getMaterial(materialName));
 		}
-
-		SectionManager.init();
-		PriceManager.init();
 
 		for (String materialName : ShopManager.priceConfig.getKeys(false)) {
 			ConfigurationSection itemSect = ShopManager.priceConfig.getConfigurationSection(materialName);
@@ -81,17 +97,8 @@ public class ShopManager implements Listener {
 			}
 			PriceManager.priceMap.put(material, materialPrice);
 		}
-
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(Util.getMain(), new Runnable() {
-			@Override
-			public void run() {
-				for (Player player : openSelling.keySet()) {
-					updateSellItem(player);
-				}
-			}
-		}, 40l, 40l);
 	}
-
+	
 	public static void updateSellItem(final Player player) {
 
 		Bukkit.getScheduler().scheduleSyncDelayedTask(Util.getMain(), new Runnable() {
@@ -99,7 +106,7 @@ public class ShopManager implements Listener {
 			public void run() {
 				Inventory inv = openSelling.get(player);
 				if (!containsDenySell(inv.getContents())) {
-					double price = getPrice(inv.getContents());
+					double price = getSellPrice(inv.getContents());
 					DecimalFormat df = new DecimalFormat("#.##");
 
 					inv.setItem(35, Util.newItemMeta(Material.STAINED_GLASS_PANE, "&7Sell for &a$" + df.format(price), null, 1, (short) 5));
@@ -123,7 +130,7 @@ public class ShopManager implements Listener {
 		player.openInventory(sellInv);
 	}
 
-	public static double getPrice(ItemStack[] contents) {
+	public static double getSellPrice(ItemStack[] contents) {
 		double total = 0;
 		for (int i = 0; i < contents.length; i++) {
 			ItemStack item = contents[i];
@@ -132,7 +139,7 @@ public class ShopManager implements Listener {
 					break;
 				else {
 					if (!denySell.contains(item.getType())) {
-						total += (PriceManager.getPrice(item.getType(), item.getDurability()) * item.getAmount()) / 2;
+						total += (PriceManager.getPrice(item.getType(), item.getDurability()) * item.getAmount()) * config.getDouble("sell_price_multiplier");
 					}
 				}
 			}
@@ -164,7 +171,7 @@ public class ShopManager implements Listener {
 	}
 
 	public static boolean isPickup(InventoryAction a) {
-		return a.equals(InventoryAction.PICKUP_ALL) || a.equals(InventoryAction.PICKUP_HALF) || a.equals(InventoryAction.PICKUP_ONE) || a.equals(InventoryAction.PICKUP_SOME);
+		return a.equals(InventoryAction.PICKUP_ALL) || a.equals(InventoryAction.PICKUP_HALF) || a.equals(InventoryAction.PICKUP_ONE) || a.equals(InventoryAction.PICKUP_SOME) || a.equals(InventoryAction.MOVE_TO_OTHER_INVENTORY);
 	}
 
 	public static int itemAmount(ItemStack[] contents) {
@@ -181,12 +188,12 @@ public class ShopManager implements Listener {
 	public void onInventoryClick(final InventoryClickEvent e) {
 		final Player player = (Player) e.getWhoClicked();
 		if (openSelling.containsKey(player)) {
-
+			updateSellItem(player);
 			if (isPickup(e.getAction())) {
-				if (e.getInventory().getSize() == 36 && e.getSlot() == 35) {
+				if (e.getInventory().getSize() == 36 && e.getSlot() == 35 && !e.getClickedInventory().equals(player.getInventory())) {
 					e.setCancelled(true);
 					if (!containsDenySell(e.getInventory().getContents())) {
-						double price = getPrice(e.getInventory().getContents());
+						double price = getSellPrice(e.getInventory().getContents());
 						DecimalFormat df = new DecimalFormat("#.##");
 						openSelling.get(player).clear();
 						openSelling.remove(player);
