@@ -19,6 +19,7 @@ import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -38,6 +39,8 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import net.izenith.Commands.AdminChat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
+import protocolsupport.api.ProtocolSupportAPI;
+import protocolsupport.api.ProtocolVersion;
 
 @SuppressWarnings("deprecation")
 public class Util {
@@ -211,17 +214,17 @@ public class Util {
 		return is;
 	}
 
-	public static void giveItem(Player player, ItemStack item){
+	public static void giveItem(Player player, ItemStack item) {
 		PlayerInventory inv = player.getInventory();
-		for(int i = 0; i < inv.getSize(); i++){
-			if(inv.getItem(i) == null){
-				inv.setItem(i,item);
+		for (int i = 0; i < inv.getSize(); i++) {
+			if (inv.getItem(i) == null) {
+				inv.setItem(i, item);
 				return;
 			}
 		}
 		player.getWorld().dropItem(player.getLocation(), item);
 	}
-	
+
 	//	public static ItemStack enchant(ItemStack item, Player player){
 	//		int ver = ((CraftPlayer) player).getHandle().playerConnection.networkManager.getVersion();
 	//	}
@@ -269,14 +272,14 @@ public class Util {
 		return getMain().getConfig();
 	}
 
-	public static void saveConfig(){
+	public static void saveConfig() {
 		getMain().saveConfig();
 	}
-	
-	public static void reloadConfig(){
+
+	public static void reloadConfig() {
 		getMain().reloadConfig();
 	}
-	
+
 	public static boolean hasJoined(Player player) {
 		File dataFolder = new File(Util.getMain().getDataFolder().getPath() + System.getProperty("file.separator") + "players");
 		return new File(dataFolder.getPath() + System.getProperty("file.separator") + player.getUniqueId() + ".yml").exists();
@@ -405,11 +408,10 @@ public class Util {
 	}
 
 	public static void setupAutoBroadcast() {
-		final List<String> messages = getConfig().getStringList("auto_messages");
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(getMain(), new Runnable() {
 			@Override
 			public void run() {
-				String message = messages.get(Vars.messageIndex);
+				String message = Vars.autoMessages.get(Vars.messageIndex);
 				Bukkit.broadcastMessage("");
 				Bukkit.broadcastMessage(parseColors("&8&m---------------------&f\u2606&4&liZenith&f&lPVP&f\u2606&8&m---------------------"));
 				Bukkit.broadcastMessage("");
@@ -418,7 +420,7 @@ public class Util {
 				Bukkit.broadcastMessage(parseColors("&8&m-----------------------------------------------------"));
 				Bukkit.broadcastMessage("");
 				Vars.messageIndex++;
-				if (Vars.messageIndex == messages.size()) {
+				if (Vars.messageIndex >= Vars.autoMessages.size()) {
 					Vars.messageIndex = 0;
 				}
 			}
@@ -470,25 +472,37 @@ public class Util {
 		}
 	}
 
-	public static String formatDouble(Double num){
-		String s = num.toString();
+	public static String formatDouble(Double num) {
+		String s = formatDouble(num, "#.##");
 		String[] split = s.split("\\.");
 		String format = "";
 		char[] chars = split[0].toCharArray();
 		String append = "";
-		for(int i = 0; i < chars.length; i++){
-			append = chars[chars.length - (i+1)] + append;
-			if((i + 1) % 3 == 0 || i == chars.length - 1){
+		for (int i = 0; i < chars.length; i++) {
+			append = chars[chars.length - (i + 1)] + append;
+			if ((i + 1) % 3 == 0 || i == chars.length - 1) {
 				format = append + "," + format;
 				append = "";
 			}
 		}
-		return format.substring(0,format.length() - 1) + "." + split[1];
+		String ret = format.substring(0, format.length() - 1);
+		if (split.length > 1)
+			ret += "." + split[1];
+		return ret;
 	}
-	
-	public static String formatDouble(Double num, String format){
+
+	public static String formatDouble(Double num, String format) {
 		DecimalFormat df = new DecimalFormat(format);
 		return df.format(num);
 	}
-	
+
+	public static void kickBoats() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if(player.isInsideVehicle() && player.getVehicle() instanceof Boat && ProtocolSupportAPI.getProtocolVersion(player).isBefore(ProtocolVersion.MINECRAFT_1_9)){
+				player.getVehicle().eject();
+				player.sendMessage(ChatColor.RED + "Boats are currently disabled for versions lower than " + ChatColor.DARK_RED + "1.9");
+			}
+		}
+	}
+
 }
