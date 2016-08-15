@@ -48,6 +48,12 @@ public class DamageListener implements Listener {
 					e.setCancelled(true);
 				}
 			}
+			
+			double damage = e.getDamage();
+			if((damage = damage * 1.75) > 20)
+				damage = 20;
+			e.setDamage(damage);
+			
 		}
 
 	}
