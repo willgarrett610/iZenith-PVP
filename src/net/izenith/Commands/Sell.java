@@ -31,12 +31,12 @@ public class Sell implements HubCommand{
 
 	@Override
 	public boolean hasPermission() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public Permission getPermission() {
-		return null;
+		return new Permission("shop.sell");
 	}
 
 	
