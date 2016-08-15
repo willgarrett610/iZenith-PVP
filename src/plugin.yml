@@ -54,7 +54,7 @@ commands:
     usage: /<command> <name>
     aliases: [kits]
   rkits:
-    decsription: Reload kits
+    description: Reload kits
     usage: /<command>
   clearkit:
     description: Clear Kit
@@ -70,19 +70,23 @@ commands:
     description: View kds
     usage: /<command> <player,page>
   sell:
-    decsription: Sell items
+    description: Sell items
     usage: /<command>
   buy:
     description: Buy items
     usage: /<command>
     aliases: [shop]
-  anvil:
-    description: anvil
-    usage: /<command>
   izreload:
     description: reload izenith
     usage: /<command>
-   
+  warps:
+    description: Warps
+    usage: /<command>
+    aliases: ["warp"]
+  buymoney:
+    description: Buy money
+    usage: /<command>
+  
 permissions:
   commandspy.use:
     description: gives access to /commandspy
@@ -142,4 +146,13 @@ permissions:
     default: OP
   iz.reload:
     description: Reload the izenith plugin
+    default: OP
+  shop.buy:
+    description: Access to /shop
+    default: OP
+  shop.sell:
+    description: Access to /sell
+    default: OP
+  izenith.chat.format:
+    description: Format chat messages
     default: OP
