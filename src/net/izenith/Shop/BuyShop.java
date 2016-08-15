@@ -93,7 +93,12 @@ public class BuyShop {
 
 	public static void openAmountSelection(final Player player, final MaterialData item) {
 		ItemInfo itemInfo = Items.itemByType(item.material, item.data);
-		final GUI gui = new GUI(27, Util.parseColors("&a&lBuying " + itemInfo.name), Vars.guiHandler);
+		String title = Util.parseColors("&a&lBuying " + itemInfo.name);
+		
+		if(title.length() > 28)
+			title = title.substring(0,28);
+		
+		final GUI gui = new GUI(27, title, Vars.guiHandler);
 		gui.addButton(Util.newItemMeta(Material.STAINED_GLASS_PANE, "&a&lAdd 1", null, 1, (short) 5), 3, new Runnable() {
 			@Override
 			public void run() {
