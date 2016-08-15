@@ -232,32 +232,42 @@ public class IPlayer {
 	public void sendChatMessage(String text) {
 		MPlayer mPlayer = MPlayer.get((Object) player);
 		Faction faction = mPlayer.getFaction();
+		if (!player.hasPermission("izenith.chat.format")) {
+			text = ChatColor.stripColor(text);
+		} else {
+			text = Util.parseColors(text);
+		}
 		for (final Player player : Bukkit.getOnlinePlayers()) {
-			MPlayer itMPlayer = MPlayer.get((Object) player);
-			Rel rel = faction.getRelationTo(itMPlayer.getFaction());
 
-			ChatColor colorCode = faction.getColorTo(itMPlayer);
+			if (!Util.ess.getUser(player).isIgnoredPlayer(Util.ess.getUser(this.player))) {
 
-			rel = mPlayer.getRelationTo(faction);
-			String prefix = rel.equals(Rel.RECRUIT) ? "-" : rel.equals(Rel.MEMBER) ? "+" : rel.equals(Rel.OFFICER) ? "*" : "**";
-			
-			String factionName = isInFaction() ? "&0[" + colorCode + prefix + faction.getName() + "&0]&r " : "";
-			String message = Util.parseColors(factionName + getRankName() + " &0\u2192 &f" + text);
-			if (!this.player.equals(player) && Util.containsIgnoreCase(message, player.getName())) {
+				MPlayer itMPlayer = MPlayer.get((Object) player);
+				Rel rel = faction.getRelationTo(itMPlayer.getFaction());
 
-				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 1f, 1f);
-				Util.getMain().getServer().getScheduler().scheduleSyncDelayedTask(Util.getMain(), new Runnable() {
-					@Override
-					public void run() {
-						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 1f, 1.25f);
-					}
-				}, 10l);
+				ChatColor colorCode = faction.getColorTo(itMPlayer);
 
-				int index = message.toLowerCase().indexOf(player.getName().toLowerCase());
-				String newMessage = message.substring(0, index) + ChatColor.RED + message.substring(index, index + player.getName().length()) + ChatColor.WHITE + message.substring(index + player.getName().length(), message.length());
-				player.sendMessage(newMessage);
-			} else {
-				player.sendMessage(message);
+				rel = mPlayer.getRelationTo(faction);
+				String prefix = rel.equals(Rel.RECRUIT) ? "-" : rel.equals(Rel.MEMBER) ? "+" : rel.equals(Rel.OFFICER) ? "*" : "**";
+
+				String factionName = isInFaction() ? "&0[" + colorCode + prefix + faction.getName() + "&0]&r " : "";
+
+				String message = Util.parseColors(factionName + getRankName() + " &0\u2192 &f") + text;
+				if (!this.player.equals(player) && Util.containsIgnoreCase(message, player.getName())) {
+
+					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 1f, 1f);
+					Util.getMain().getServer().getScheduler().scheduleSyncDelayedTask(Util.getMain(), new Runnable() {
+						@Override
+						public void run() {
+							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 1f, 1.25f);
+						}
+					}, 10l);
+
+					int index = message.toLowerCase().indexOf(player.getName().toLowerCase());
+					String newMessage = message.substring(0, index) + ChatColor.RED + message.substring(index, index + player.getName().length()) + ChatColor.WHITE + message.substring(index + player.getName().length(), message.length());
+					player.sendMessage(newMessage);
+				} else {
+					player.sendMessage(message);
+				}
 			}
 		}
 	}
@@ -265,7 +275,7 @@ public class IPlayer {
 	public boolean isInFaction() {
 		MPlayer mPlayer = MPlayer.get((Object) player);
 		Faction faction = mPlayer.getFaction();
-		String id = faction.getId(); 
+		String id = faction.getId();
 		return !(id.equals(Factions.ID_NONE) || id.equals(Factions.ID_SAFEZONE) || id.equals(Factions.ID_WARZONE));
 	}
 
@@ -274,7 +284,7 @@ public class IPlayer {
 
 		String header = replacePlaceholders(Util.getConfig().getString("tab.header"));
 		String footer = replacePlaceholders(Util.getConfig().getString("tab.footer"));
-		
+
 		pc.getChatComponents().write(0, WrappedChatComponent.fromText(Util.parseColors(header))).write(1, WrappedChatComponent.fromText(Util.parseColors(footer)));
 		try {
 			Vars.protocolManager.sendServerPacket(player, pc);
@@ -282,20 +292,14 @@ public class IPlayer {
 			e.printStackTrace();
 		}
 	}
-	
-	public String replacePlaceholders(String string){
+
+	public String replacePlaceholders(String string) {
 		String kd = getKD();
 
 		Double bal = Util.getEconomy().getBalance(player);
 		String balFormat = Util.formatDouble(bal);
-		
-		return string
-				.replaceAll("\\{ONLINE_PLAYERS\\}", Bukkit.getOnlinePlayers().size() + "")
-				.replaceAll("\\{PING\\}", getPingWithColor())
-				.replaceAll("\\{KILLS\\}", getKills().intValue() + "")
-				.replaceAll("\\{DEATHS\\}", getDeaths().intValue() + "")
-				.replaceAll("\\{KD\\}", kd)
-				.replaceAll("\\{BALANCE\\}", balFormat);
+
+		return string.replaceAll("\\{ONLINE_PLAYERS\\}", Bukkit.getOnlinePlayers().size() + "").replaceAll("\\{PING\\}", getPingWithColor()).replaceAll("\\{KILLS\\}", getKills().intValue() + "").replaceAll("\\{DEATHS\\}", getDeaths().intValue() + "").replaceAll("\\{KD\\}", kd).replaceAll("\\{BALANCE\\}", balFormat);
 	}
 
 	public void setLastUse(String world, Kit kit, long time) {
@@ -308,7 +312,7 @@ public class IPlayer {
 	}
 
 	public long getLastUse(String world, Kit kit) {
-		String path = "last_use." + world + "."  + kit.name;
+		String path = "last_use." + world + "." + kit.name;
 		if (config.contains(path))
 			return config.getLong(path);
 		else
