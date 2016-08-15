@@ -26,8 +26,12 @@ public class PlayerMoveListener implements Listener{
 		}
 		
 		GameMode gm = e.getPlayer().getGameMode();
-		if((gm.equals(GameMode.SURVIVAL) || gm.equals(GameMode.ADVENTURE)) && e.getPlayer().getInventory().contains(Material.GLASS_BOTTLE)){
+		if((gm.equals(GameMode.SURVIVAL) || gm.equals(GameMode.ADVENTURE)) && e.getPlayer().getInventory().contains(Material.GLASS_BOTTLE) && e.getPlayer().getLocation().getWorld().getName().equals("kitpvp")){
 			e.getPlayer().getInventory().remove(Material.GLASS_BOTTLE);
+		}
+		
+		if(gm.equals(GameMode.ADVENTURE) && e.getPlayer().getWorld().getName().equals("faction")){
+			e.getPlayer().setGameMode(GameMode.SURVIVAL);
 		}
 	}
 	
