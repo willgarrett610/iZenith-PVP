@@ -20,8 +20,8 @@ import net.izenith.Chat.ChatHandler;
 import net.izenith.CommandSpy.CommandFilter;
 import net.izenith.CommandSpy.CommandListener;
 import net.izenith.Commands.AdminChat;
-import net.izenith.Commands.Anvil;
 import net.izenith.Commands.Buy;
+import net.izenith.Commands.BuyMoney;
 import net.izenith.Commands.ClearChat;
 import net.izenith.Commands.ClearKit;
 import net.izenith.Commands.CommandSpy;
@@ -42,6 +42,7 @@ import net.izenith.Commands.Sell;
 import net.izenith.Commands.ServerIp;
 import net.izenith.Commands.SetKit;
 import net.izenith.Commands.UpdateList;
+import net.izenith.Commands.Warps;
 import net.izenith.Events.BrewListener;
 import net.izenith.Events.DamageListener;
 import net.izenith.Events.InventoryListener;
@@ -69,6 +70,7 @@ public class Vars {
 	public static ProtocolManager protocolManager;
 	public static ServerSocket remoteConsoleSocket;
 	public static int messageIndex = 0;
+	public static List<String> autoMessages;
  
 	public static void init(Main plugin) {
 		guiHandler = new GUIHandler(plugin);
@@ -85,6 +87,7 @@ public class Vars {
 				for(IPlayer player : IPlayerHandler.players.values()){
 					player.sendTabFootHeader();
 				}
+				Util.kickBoats();
 			}
 			
 		}, 20l, 20l);
@@ -110,8 +113,9 @@ public class Vars {
 				new KD(),
 				new Sell(),
 				new Buy(),
-				new Anvil(),
-				new Reload()
+				new Reload(),
+				new Warps(),
+				new BuyMoney()
 				//new Console()
 				};
 		commandSpy = new HashMap<Player, CommandFilter>();
@@ -142,6 +146,8 @@ public class Vars {
 		}
 		/* new TimeHandler(); */
 		protocolManager = ProtocolLibrary.getProtocolManager();
+		
+		autoMessages = Util.getConfig().getStringList("auto_messages");
 	}
 
 }
